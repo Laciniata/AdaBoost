@@ -180,7 +180,8 @@ def update_weight(weight: np.ndarray, alpha: np.float64, predict_label: list, tr
     Returns:
         updated_weight (np.ndarray): 更新后的样本权重分布
     """
-    exp_factor = np.where(np.array(predict_label) == np.array(true_label), np.exp(-alpha), np.exp(alpha))
+    exp_factor = np.exp(-alpha * np.array(predict_label) * np.array(true_label))  # 仅限分类为1,-1时使用
+    # exp_factor = np.where(np.array(predict_label) == np.array(true_label), np.exp(-alpha), np.exp(alpha))
     updated_weight = np.array(weight) * exp_factor  # 更新样本分布
     updated_weight = updated_weight / np.sum(updated_weight)  # 归一化
     return updated_weight
