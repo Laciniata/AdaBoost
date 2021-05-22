@@ -134,22 +134,27 @@ def decision_stump_predict(data: pd.DataFrame, decision_stump: tuple):
     return predict_label
 
 
-def calculate_precision(predict_label: list, true_label: list):
+def calculate_precision(predict_label: list, true_label: list, weight: np.ndarray = None):
     """
-    计算分类精度。
+    计算加权分类精度，不输入weight时为不加权精度。
 
     Args:
         predict_label (list): 分类标签
         true_label (list): 真实标签
+        weight (np.ndarray): 样本权重（分布）
 
     Returns:
         分类精度
     """
+    if weight is None:  # 无权重，则所有权重相等
+        weight = np.ones(len(predict_label))
+        weight = weight / weight.sum()
+    weight_flatten = weight.flatten()
     wrong = 0
     for i in range(len(predict_label)):
         if predict_label[i] != true_label[i]:
-            wrong += 1
-    return 1 - wrong / len(predict_label)
+            wrong += weight_flatten[i]
+    return 1 - wrong
 
 
 def decision_stump_precision(data: pd.DataFrame, decision_stump: tuple):
@@ -206,7 +211,7 @@ def adaboost_fit(n_estimator: int, data: pd.DataFrame):
     for i in range(n_estimator):
         decision_stump = decision_stump_fit(data, weight)
         predict_label = decision_stump_predict(data, decision_stump)
-        epsilon = 1 - calculate_precision(predict_label, data['类别'].tolist())
+        epsilon = 1 - calculate_precision(predict_label, data['类别'].tolist(), weight)
         if epsilon > 0.5:
             i -= 1
             weight = update_weight(weight, alpha, predict_label, data['类别'].tolist())
@@ -300,7 +305,7 @@ def loop_plot_result(data, _range):
 
 if __name__ == '__main__':
     data_set = data_init()
-    decision_stumps, alphas, weight = adaboost_fit(14, data_set)
+    decision_stumps, alphas, weight = adaboost_fit(7, data_set)
     predict_label = adaboost_predict(data_set, decision_stumps, alphas)
     pre = calculate_precision(predict_label, data_set['类别'].tolist())
     print('基分类器-决策树桩：', decision_stumps)
