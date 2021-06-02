@@ -3,4 +3,4 @@ Assignment for the "Machine Learning" course of the Department of Control Scienc
 
 ## Data Set
 
-This assignment requires to use ./dataset/data_set.csv as the data set.
+This assignment requires to use ./dataset/dataset.csv as the data set.
